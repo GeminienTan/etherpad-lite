@@ -3,9 +3,6 @@ language: node_js
 node_js:
   - "lts/*"
 
-services:
-  - docker
-
 cache: false
 
 before_install:
@@ -17,14 +14,26 @@ before_install:
 install:
   - "bin/installDeps.sh"
   - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
+  
+
+before_script:
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- ./cc-test-reporter before-build
 
 script:
-  - "tests/frontend/travis/runner.sh"
+
+
+after_script:
+- ./cc-test-reporter after-build
+
+script:
+- "tests/frontend/travis/runner.sh"
+- nyc --reporter=lcov npm run test
 
 env:
   global:
-    - secure: "WMGxFkOeTTlhWB+ChMucRtIqVmMbwzYdNHuHQjKCcj8HBEPdZLfCuK/kf4rG\nVLcLQiIsyllqzNhBGVHG1nyqWr0/LTm8JRqSCDDVIhpyzp9KpCJQQJG2Uwjk\n6/HIJJh/wbxsEdLNV2crYU/EiVO3A4Bq0YTHUlbhUqG3mSCr5Ec="
-    - secure: "gejXUAHYscbR6Bodw35XexpToqWkv2ifeECsbeEmjaLkYzXmUUNWJGknKSu7\nEUsSfQV8w+hxApr1Z+jNqk9aX3K1I4btL3cwk2trnNI8XRAvu1c1Iv60eerI\nkE82Rsd5lwUaMEh+/HoL8ztFCZamVndoNgX7HWp5J/NRZZMmh4g="
+  secure= "33DdjQ6wo8CvTyC5JHbhjOME//6zkVoCx28JzjdIWYGhcOyn/fk6yyVzvEdHRV0tbinO99pJzdlwZoYTBhicMFXT91nUYb7n0UIAVTxKOFevHEYppLpj6eYUk92ktKFOWSN0S5NMtf6+4GEqNNf9dnpGekXvKk86n/lbZSuOsBX9FIH5AiRiipwL4I5YlLJ+gri7KgEpk+zrSPaxcLVPtbWmlzvW8J5zv/zbmYSxSbFQZsWLN6PjFPbzX2UdBymfN+kw1QhALrt0xxDeutoPWwYQUb84cGbv5NVa6jGcyhTnCfFrorgRN+NQWmBR+gEEuNs/Ku6DiF+T9uAkhY//Es3XsUTFEUev4XCFwLoMUuotfIlHk5p6aBGDL8dyykli0ERkzGE0EUaAnynS+YNFb95eaEo2E/dsQtVGqFnjfXNgnzcwpwXDrt4yr0o6zkAEhlTgLP6fQMs0CSh7nft+XLeHzPUolBpX88ZlWoQQ67MdbD9gRlHP14H/Z0nCA+2npc5ggShkBqYUTGV+fkfTwozWIcbv4RZT8yT1NRZkaUTb5dM5O/ZbDfDrP+NUpqkh8POTShWYYDHEvdRc6PGDkXFOVI6E7hS8vF0xOhud2oJtPLtXyLGaaMS1czWPixDrcBQ4gRBgY8ekib6B1+R4fLLOzTsuQfwFpJ0gNraBYvc="
 
 jobs:
   include:
@@ -46,14 +55,6 @@ jobs:
         - "cd src && npm install && cd -"
       script:
         - "tests/frontend/travis/runnerBackend.sh"
-## Temporarily commented out the Dockerfile tests
-#    - name: "Test the Dockerfile"
-#      install:
-#        - "cd src && npm install && cd -"
-#      script:
-#        - "docker build -t etherpad:test ."
-#        - "docker run -d -p 9001:9001 etherpad:test && sleep 3"
-#        - "cd src && npm run test-container"
     - name: "Load test Etherpad"
       install:
         - "bin/installDeps.sh"
@@ -61,8 +62,9 @@ jobs:
         - "npm install -g etherpad-load-test"
       script:
         - "tests/frontend/travis/runnerLoadTest.sh"
+        
+        
 
 notifications:
-  irc:
-    channels:
-      - "irc.freenode.org#etherpad-lite-dev"
+ email:
+  - geminientan@hotmail.com 
